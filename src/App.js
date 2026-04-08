@@ -1,42 +1,180 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-// src/App.tsx - componente React completo
-import { useState, useCallback } from "react";
+/**
+ * Componente principal da aplicação Calculadora de Energia Solar.
+ * 
+ * @returns {JSX.Element} O componente App.
+ */
+import { useState, useCallback, useMemo } from "react";
+
+/**
+ * Estado inicial para as simulações.
+ * 
+ * @type {Object[]}
+ */
 const initialSimulations = [];
+
+/**
+ * Componente App.
+ * 
+ * @returns {JSX.Element} O componente App.
+ */
 export default function App() {
-    const [simulations, setSimulations] = useState(initialSimulations);
-    const [currentSimulation, setCurrentSimulation] = useState(null);
-    const handleNewSimulation = useCallback(() => {
-        setCurrentSimulation({
-            id: Date.now(),
-            customerName: "",
-            currentConsumption: 0,
-            location: "Minas Gerais",
-            currentOperator: "Cemig",
-            currentTariff: 0.6,
-            installationType: "residencial",
-            numberOfPanels: 0,
-            panelPower: 450,
-            inverterEfficiency: 95,
-            systemLosses: 10,
-            roofTilt: 30,
-            roofOrientation: "Sul",
-            additionalCosts: 0,
-            financing: false,
-            financingDetails: "",
-            estimatedGeneration: 0,
-            monthlySavings: 0,
-            annualSavings: 0,
-            paybackPeriod: 0,
-            roi5Years: 0,
-            roi10Years: 0,
-            roi15Years: 0,
-            roi25Years: 0,
-            co2Reduction: 0,
-        });
-    }, []);
-    const handleSaveSimulation = useCallback((simulation) => {
-        setSimulations(prevSimulations => [...prevSimulations, simulation]);
-        setCurrentSimulation(null);
-    }, []);
-    return (_jsxs("div", { className: "bg-zinc-900 text-white min-h-screen flex flex-col", children: [_jsx("header", { className: "p-4 bg-gradient-to-r from-green-600 to-green-400", children: _jsx("h1", { className: "text-2xl font-bold", children: "Solar Economy" }) }), _jsxs("main", { className: "flex-grow p-4", children: [_jsx("button", { className: "bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl mb-4", onClick: handleNewSimulation, children: "Nova Simula\u00E7\u00E3o" }), _jsxs("div", { className: "bg-zinc-800 p-4 rounded-xl", children: [_jsx("h2", { className: "text-xl font-bold mb-2", children: "Hist\u00F3rico de Simula\u00E7\u00F5es" }), _jsx("ul", { children: simulations.map(simulation => (_jsxs("li", { className: "mb-2", children: [_jsx("span", { className: "font-bold", children: "Cliente:" }), " ", simulation.customerName, " | ", _jsx("span", { className: "font-bold", children: "Economia Anual:" }), " R$", simulation.annualSavings.toFixed(2)] }, simulation.id))) })] })] }), _jsx("footer", { className: "p-4 bg-gradient-to-r from-green-400 to-green-600", children: _jsx("p", { children: "\u00A9 2023 Solar Economy" }) })] }));
+  /**
+   * Estado para armazenar as simulações.
+   * 
+   * @type {Object[]}
+   */
+  const [simulations, setSimulations] = useState(initialSimulations);
+
+  /**
+   * Estado para armazenar a simulação atual.
+   * 
+   * @type {Object|null}
+   */
+  const [currentSimulation, setCurrentSimulation] = useState(null);
+
+  /**
+   * Função para criar uma nova simulação.
+   * 
+   * @returns {void}
+   */
+  const handleNewSimulation = useCallback(() => {
+    /**
+     * Cria uma nova simulação com os valores iniciais.
+     * 
+     * @type {Object}
+     */
+    const newSimulation = {
+      id: Date.now(),
+      customerName: "",
+      currentConsumption: 0,
+      location: "Minas Gerais",
+      currentOperator: "Cemig",
+      currentTariff: 0.6,
+      installationType: "residencial",
+      numberOfPanels: 0,
+      panelPower: 450,
+      inverterEfficiency: 95,
+      systemLosses: 10,
+      roofTilt: 30,
+      roofOrientation: "Sul",
+      additionalCosts: 0,
+      financing: false,
+      financingDetails: "",
+      estimatedGeneration: 0,
+      monthlySavings: 0,
+      annualSavings: 0,
+      paybackPeriod: 0,
+      roi5Years: 0,
+      roi10Years: 0,
+      roi15Years: 0,
+      roi25Years: 0,
+      co2Reduction: 0,
+    };
+    setCurrentSimulation(newSimulation);
+  }, []);
+
+  /**
+   * Função para salvar uma simulação.
+   * 
+   * @param {Object} simulation A simulação a ser salva.
+   * @returns {void}
+   */
+  const handleSaveSimulation = useCallback((simulation) => {
+    /**
+     * Adiciona a simulação ao estado de simulações.
+     * 
+     * @type {Object[]}
+     */
+    setSimulations((prevSimulations) => [...prevSimulations, simulation]);
+    /**
+     * Limpa a simulação atual.
+     * 
+     * @type {null}
+     */
+    setCurrentSimulation(null);
+  }, []);
+
+  /**
+   * Lista de simulações.
+   * 
+   * @type {JSX.Element[]}
+   */
+  const simulationList = useMemo(() => {
+    /**
+     * Mapeia as simulações para criar uma lista de itens.
+     * 
+     * @returns {JSX.Element[]}
+     */
+    return simulations.map((simulation) => (
+      <li key={simulation.id} className="mb-2">
+        <span className="font-bold">Cliente:</span> {simulation.customerName} |{" "}
+        <span className="font-bold">Economia Anual:</span> R${simulation.annualSavings.toFixed(2)}
+      </li>
+    ));
+  }, [simulations]);
+
+  /**
+   * Formulário para criar uma nova simulação.
+   * 
+   * @type {JSX.Element}
+   */
+  const simulationForm = (
+    <div className="bg-zinc-800 p-4 rounded-xl">
+      <h2 className="text-xl font-bold mb-2">Nova Simulação</h2>
+      <form>
+        <label className="block mb-2">
+          <span className="font-bold">Nome do Cliente:</span>
+          <input
+            type="text"
+            value={currentSimulation?.customerName || ""}
+            onChange={(e) => setCurrentSimulation({ ...currentSimulation, customerName: e.target.value })}
+            className="block w-full p-2 mb-2"
+          />
+        </label>
+        <label className="block mb-2">
+          <span className="font-bold">Consumo Atual:</span>
+          <input
+            type="number"
+            value={currentSimulation?.currentConsumption || 0}
+            onChange={(e) => setCurrentSimulation({ ...currentSimulation, currentConsumption: Number(e.target.value) })}
+            className="block w-full p-2 mb-2"
+          />
+        </label>
+        <button
+          className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl mb-4"
+          onClick={(e) => {
+            e.preventDefault();
+            handleSaveSimulation(currentSimulation);
+          }}
+        >
+          Salvar Simulação
+        </button>
+      </form>
+    </div>
+  );
+
+  return (
+    <div className="bg-zinc-900 text-white min-h-screen flex flex-col">
+      <header className="p-4 bg-gradient-to-r from-green-600 to-green-400">
+        <h1 className="text-2xl font-bold">Solar Economy</h1>
+      </header>
+      <main className="flex-grow p-4">
+        <button
+          className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl mb-4"
+          onClick={handleNewSimulation}
+        >
+          Nova Simulação
+        </button>
+        {currentSimulation ? simulationForm : (
+          <div className="bg-zinc-800 p-4 rounded-xl">
+            <h2 className="text-xl font-bold mb-2">Histórico de Simulações</h2>
+            <ul>{simulationList}</ul>
+          </div>
+        )}
+      </main>
+      <footer className="p-4 bg-gradient-to-r from-green-400 to-green-600">
+        <p>&copy; 2023 Solar Economy</p>
+      </footer>
+    </div>
+  );
 }
