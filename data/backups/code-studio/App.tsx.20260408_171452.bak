@@ -41,32 +41,19 @@ interface SimulacaoSolar {
 
 const validarSimulacao = (simulacao: Partial<SimulacaoSolar>): string[] => {
   const erros: string[] = [];
-
-  // Validação completa
+  
   if (!simulacao.nome_cliente?.trim()) {
     erros.push("Nome do cliente é obrigatório");
   }
-
+  
   if (!simulacao.consumo_atual || simulacao.consumo_atual <= 0) {
     erros.push("Consumo atual deve ser maior que zero");
   }
-
+  
   if (!simulacao.tarifa_atual || simulacao.tarifa_atual <= 0) {
     erros.push("Tarifa atual deve ser maior que zero");
   }
-
-  if (!simulacao.localizacao?.trim()) {
-    erros.push("Localização é obrigatória");
-  }
-
-  if (!simulacao.operadora_atual?.trim()) {
-    erros.push("Operadora atual é obrigatória");
-  }
-
-  if (!simulacao.tipo_instalacao?.trim()) {
-    erros.push("Tipo de instalação é obrigatório");
-  }
-
+  
   return erros;
 };
 
@@ -75,26 +62,19 @@ export default function App() {
   const [simulacaoAtual, setSimulacaoAtual] = useState<SimulacaoSolar | null>(null);
   const [carregando, setCarregando] = useState(false);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [pagina, setPagina] = useState(1);
-  const [totalSimulacoes, setTotalSimulacoes] = useState(0);
 
   const carregarSimulacoes = useCallback(async () => {
     try {
       setCarregando(true);
-      const response = await apiClient.get('/api/simulacoes-solar', {
-        params: {
-          pagina,
-        },
-      });
-      setSimulacoes(response.data.simulacoes);
-      setTotalSimulacoes(response.data.total);
+      const response = await apiClient.get('/api/simulacoes-solar');
+      setSimulacoes(response.data);
     } catch (error) {
       toast.error("Erro ao carregar simulações");
       console.error("Erro ao carregar simulações:", error);
     } finally {
       setCarregando(false);
     }
-  }, [pagina]);
+  }, []);
 
   const criarNovaSimulacao = useCallback(() => {
     const novaSimulacao: Partial<SimulacaoSolar> = {
@@ -114,14 +94,14 @@ export default function App() {
       financiamento: false,
       detalhes_financiamento: "",
     };
-
+    
     setSimulacaoAtual(novaSimulacao as SimulacaoSolar);
     setMostrarFormulario(true);
   }, []);
 
   const salvarSimulacao = useCallback(async (simulacao: Partial<SimulacaoSolar>) => {
     const erros = validarSimulacao(simulacao);
-
+    
     if (erros.length > 0) {
       toast.error(`Erro de validação: ${erros.join(", ")}`);
       return;
@@ -129,16 +109,16 @@ export default function App() {
 
     try {
       setCarregando(true);
-
+      
       const response = await apiClient.post('/api/simulacoes-solar', {
         ...simulacao,
-        company_id: 1, // TODO: Pegar do contexto do usuário
+        company_id: 1 // TODO: Pegar do contexto do usuário
       });
-
+      
       setSimulacoes(prev => [...prev, response.data]);
       setMostrarFormulario(false);
       setSimulacaoAtual(null);
-
+      
       toast.success("Simulação salva com sucesso!");
     } catch (error) {
       toast.error("Erro ao salvar simulação");
@@ -150,7 +130,7 @@ export default function App() {
 
   useEffect(() => {
     carregarSimulacoes();
-  }, [carregarSimulacoes, pagina]);
+  }, [carregarSimulacoes]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
@@ -201,9 +181,6 @@ export default function App() {
           simulacoes={simulacoes}
           carregando={carregando}
           onRecarregar={carregarSimulacoes}
-          pagina={pagina}
-          totalSimulacoes={totalSimulacoes}
-          onChangePagina={setPagina}
         />
       </main>
 
