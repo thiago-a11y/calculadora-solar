@@ -1,103 +1,22 @@
 {
-  /**
-   * Nome do pacote.
-   * Define o nome do projeto, que é usado para identificar o pacote em repositórios e outros contextos.
-   */
   "name": "calculadora-de-energia-solar",
-  
-  /**
-   * Indica se o pacote é privado.
-   * Se definido como true, o pacote não pode ser publicado em repositórios públicos.
-   */
   "private": true,
-  
-  /**
-   * Versão do pacote.
-   * Define a versão atual do projeto, seguindo o padrão de versionamento semântico (MAJOR.MINOR.PATCH).
-   */
   "version": "0.0.1",
-  
-  /**
-   * Tipo do módulo.
-   * Define o tipo de módulo que o pacote representa, sendo "module" para módulos ES6 e "commonjs" para módulos CommonJS.
-   */
   "type": "module",
-  
-  /**
-   * Scripts do pacote.
-   * Define comandos que podem ser executados no pacote, como build, dev e preview.
-   */
   "scripts": {
-    /**
-     * Script de desenvolvimento.
-     * Executa o comando "vite" para iniciar o servidor de desenvolvimento.
-     */
     "dev": "vite",
-    
-    /**
-     * Script de build.
-     * Executa os comandos "tsc -b" (compilação do TypeScript) e "vite build" (build do Vite) para criar a versão de produção do pacote.
-     */
     "build": "tsc -b && vite build",
-    
-    /**
-     * Script de preview.
-     * Executa o comando "vite preview" para visualizar a versão de produção do pacote.
-     */
     "preview": "vite preview"
   },
-  
-  /**
-   * Dependências do pacote.
-   * Define as bibliotecas e frameworks que o pacote depende para funcionar corretamente.
-   */
   "dependencies": {
-    /**
-     * React.
-     * Biblioteca de JavaScript para construir interfaces de usuário.
-     */
     "react": "^18.3.1",
-    
-    /**
-     * React DOM.
-     * Biblioteca de JavaScript para renderizar componentes React no DOM.
-     */
     "react-dom": "^18.3.1"
   },
-  
-  /**
-   * Dependências de desenvolvimento do pacote.
-   * Define as bibliotecas e ferramentas que o pacote depende apenas durante o desenvolvimento.
-   */
   "devDependencies": {
-    /**
-     * Tipos do React.
-     * Define os tipos de dados para a biblioteca React.
-     */
     "@types/react": "^18.3.18",
-    
-    /**
-     * Tipos do React DOM.
-     * Define os tipos de dados para a biblioteca React DOM.
-     */
     "@types/react-dom": "^18.3.5",
-    
-    /**
-     * Plugin do Vite para React.
-     * Fornece suporte ao React no Vite.
-     */
     "@vitejs/plugin-react": "^4.3.4",
-    
-    /**
-     * TypeScript.
-     * Linguagem de programação que adiciona tipos estáticos ao JavaScript.
-     */
     "typescript": "~5.7.2",
-    
-    /**
-     * Vite.
-     * Ferramenta de build e desenvolvimento para aplicativos web modernos.
-     */
     "vite": "^6.3.1"
   }
 }
