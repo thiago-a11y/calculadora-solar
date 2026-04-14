@@ -1,217 +1,34 @@
-// src/App.tsx
-import { useState, useCallback, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { Plus, Calculator } from "lucide-react";
-import { SimulationForm } from "@/components/solar/SimulationForm";
-import { SimulationHistory } from "@/components/solar/SimulationHistory";
-import { apiClient } from "@/lib/apiClient";
-
-interface SimulacaoSolar {
-  id: number;
-  company_id: number;
-  nome_cliente: string;
-  consumo_atual: number;
-  localizacao: string;
-  operadora_atual: string;
-  tarifa_atual: number;
-  tipo_instalacao: string;
-  numero_paineis: number;
-  potencia_painel: number;
-  eficiencia_inversor: number;
-  perdas_sistema: number;
-  inclinacao_telhado: number;
-  orientacao_telhado: string;
-  custos_adicionais: number;
-  financiamento: boolean;
-  detalhes_financiamento: string;
-  geracao_estimada: number;
-  economia_mensal: number;
-  economia_anual: number;
-  periodo_payback: number;
-  roi_5_anos: number;
-  roi_10_anos: number;
-  roi_15_anos: number;
-  roi_25_anos: number;
-  reducao_co2: number;
-  created_at: string;
-  updated_at: string;
-}
-
-const validarSimulacao = (simulacao: Partial<SimulacaoSolar>): string[] => {
-  const erros: string[] = [];
-
-  // Validação completa
-  if (!simulacao.nome_cliente?.trim()) {
-    erros.push("Nome do cliente é obrigatório");
-  }
-
-  if (!simulacao.consumo_atual || simulacao.consumo_atual <= 0) {
-    erros.push("Consumo atual deve ser maior que zero");
-  }
-
-  if (!simulacao.tarifa_atual || simulacao.tarifa_atual <= 0) {
-    erros.push("Tarifa atual deve ser maior que zero");
-  }
-
-  if (!simulacao.localizacao?.trim()) {
-    erros.push("Localização é obrigatória");
-  }
-
-  if (!simulacao.operadora_atual?.trim()) {
-    erros.push("Operadora atual é obrigatória");
-  }
-
-  if (!simulacao.tipo_instalacao?.trim()) {
-    erros.push("Tipo de instalação é obrigatório");
-  }
-
-  return erros;
-};
-
-export default function App() {
-  const [simulacoes, setSimulacoes] = useState<SimulacaoSolar[]>([]);
-  const [simulacaoAtual, setSimulacaoAtual] = useState<SimulacaoSolar | null>(null);
-  const [carregando, setCarregando] = useState(false);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [pagina, setPagina] = useState(1);
-  const [totalSimulacoes, setTotalSimulacoes] = useState(0);
-
-  const carregarSimulacoes = useCallback(async () => {
-    try {
-      setCarregando(true);
-      const response = await apiClient.get('/api/simulacoes-solar', {
-        params: {
-          pagina,
-        },
-      });
-      setSimulacoes(response.data.simulacoes);
-      setTotalSimulacoes(response.data.total);
-    } catch (error) {
-      toast.error("Erro ao carregar simulações");
-      console.error("Erro ao carregar simulações:", error);
-    } finally {
-      setCarregando(false);
-    }
-  }, [pagina]);
-
-  const criarNovaSimulacao = useCallback(() => {
-    const novaSimulacao: Partial<SimulacaoSolar> = {
-      nome_cliente: "",
-      consumo_atual: 0,
-      localizacao: "Minas Gerais",
-      operadora_atual: "Cemig",
-      tarifa_atual: 0.6,
-      tipo_instalacao: "residencial",
-      numero_paineis: 0,
-      potencia_painel: 450,
-      eficiencia_inversor: 95,
-      perdas_sistema: 10,
-      inclinacao_telhado: 30,
-      orientacao_telhado: "Sul",
-      custos_adicionais: 0,
-      financiamento: false,
-      detalhes_financiamento: "",
-    };
-
-    setSimulacaoAtual(novaSimulacao as SimulacaoSolar);
-    setMostrarFormulario(true);
-  }, []);
-
-  const salvarSimulacao = useCallback(async (simulacao: Partial<SimulacaoSolar>) => {
+const salvarSimulacao = useCallback(async (simulacao: Partial<SimulacaoSolar>) => {
+  try {
     const erros = validarSimulacao(simulacao);
 
-    if (erros.length > 0) {
-      toast.error(`Erro de validação: ${erros.join(", ")}`);
+    if (Object.keys(erros).length > 0) {
+      toast.error("Erro de validação:");
+      Object.keys(erros).forEach((key) => {
+        toast.error(`- ${erros[key]}`);
+      });
       return;
     }
 
-    try {
-      setCarregando(true);
+    setCarregando(true);
 
-      const response = await apiClient.post('/api/simulacoes-solar', {
-        ...simulacao,
-        company_id: 1, // TODO: Pegar do contexto do usuário
-      });
+    const response = await apiClient.post('/api/simulacoes-solar', {
+      ...simulacao,
+      company_id: 1, // TODO: Pegar do contexto do usuário
+    });
 
-      setSimulacoes(prev => [...prev, response.data]);
-      setMostrarFormulario(false);
-      setSimulacaoAtual(null);
+    setSimulacoes((prev) => [...prev, response.data]);
+    setMostrarFormulario(false);
+    setSimulacaoAtual(null);
 
-      toast.success("Simulação salva com sucesso!");
-    } catch (error) {
+    toast.success("Simulação salva com sucesso!");
+  } catch (error) {
+    if (error instanceof Error) {
+      toast.error(`Erro ao salvar simulação: ${error.message}`);
+    } else {
       toast.error("Erro ao salvar simulação");
-      console.error("Erro ao salvar simulação:", error);
-    } finally {
-      setCarregando(false);
     }
-  }, []);
-
-  useEffect(() => {
-    carregarSimulacoes();
-  }, [carregarSimulacoes, pagina]);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
-      <header className="bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <Calculator className="h-8 w-8" />
-            <h1 className="text-3xl font-bold">Calculadora Solar</h1>
-          </div>
-          <p className="mt-2 text-green-100">
-            Simule a economia com energia solar fotovoltaica
-          </p>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Button
-            onClick={criarNovaSimulacao}
-            className="bg-green-600 hover:bg-green-700"
-            disabled={carregando}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Simulação
-          </Button>
-        </div>
-
-        {mostrarFormulario && simulacaoAtual && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Nova Simulação Solar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SimulationForm
-                simulacao={simulacaoAtual}
-                onSalvar={salvarSimulacao}
-                onCancelar={() => {
-                  setMostrarFormulario(false);
-                  setSimulacaoAtual(null);
-                }}
-                carregando={carregando}
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        <SimulationHistory
-          simulacoes={simulacoes}
-          carregando={carregando}
-          onRecarregar={carregarSimulacoes}
-          pagina={pagina}
-          totalSimulacoes={totalSimulacoes}
-          onChangePagina={setPagina}
-        />
-      </main>
-
-      <footer className="bg-green-800 text-white py-6 mt-16">
-        <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2024 Objetiva Solução Empresarial - Calculadora Solar</p>
-        </div>
-      </footer>
-    </div>
-  );
-}
+  } finally {
+    setCarregando(false);
+  }
+}, []);
