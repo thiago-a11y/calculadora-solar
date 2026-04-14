@@ -1,9 +1,7 @@
-import React from 'react';
-import './App.css';
-
+import { useState } from "react"
 function App() {
   // Exemplo de código
-  const [valor, setValor] = React.useState(0);
+  const [valor, setValor] = useState(0);
 
   return (
     <div className="App">
